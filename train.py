@@ -9,10 +9,7 @@ from gensim.models.keyedvectors import WordEmbeddingsKeyedVectors
 def item2vec(dataset,min_count=3,size=300,sg=5):
     window = max(list(map(len,dataset)))
     p2v_model = WordEmbeddingsKeyedVectors(size)
-    
+
     w2v_model = Word2Vec(dataset, min_count = min_count, size = size, window = window, sg = sg,seed=1025)
     w2v_model.save('item2vec.model')
     return w2v_model
-
-if __name__ == '__main__':
-    run()

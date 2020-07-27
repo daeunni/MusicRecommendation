@@ -7,7 +7,7 @@ import util
 from collections import Counter
 from gensim.models import Word2Vec
 from gensim.models.keyedvectors import WordEmbeddingsKeyedVectors
-from util import write_json
+from util import write_json,remove_seen
 import train
 
 #total_concat : pd.DataFrame
@@ -40,11 +40,13 @@ def run(total_concat, apply_data):
     total = [x for x in total if len(x)>1]
 
     print("start training item2Vec")
+    size = 300
     if 'item2vec.model' in os.listdir():
         w2v_model = Word2Vec.load('item2vec.model')
     else:
-        w2v_model = train.item2vec(total,size=10)
+        w2v_model = train.item2vec(total,size=size)
     print("done. \n")
+    p2v_model = WordEmbeddingsKeyedVectors(size)
     ID = []
     vec = []
     for q in data:
