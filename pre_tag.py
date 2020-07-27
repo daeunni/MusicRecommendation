@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 def run(test,n_songs,n_tags,spr_list,tag_tid_id):
     start = time.time()
-    train_user_songs_A,train_user_tags_A,train_user_songs_A_T,train_user_tags_A_T,\
+    train_user_songs_A,train_user_tags_A,\
         test_title,title_sp,gnr_sp,test_gnr_sp,\
         title_gnr,test_title_gnr = spr_list
 
@@ -53,11 +53,11 @@ def run(test,n_songs,n_tags,spr_list,tag_tid_id):
         else:
             val = cosine_similarity(title_sp,test_title[i:(i+1)])
 
-        cand_song = train_user_songs_A_T.dot(val) # 행에는 노래 열에는 유저 정보 %*% 유사한 유저 -> 유사한 노래에 대하여 높은 값 나옴
+        cand_song = train_user_songs_A.T.tocsr().dot(val) # 행에는 노래 열에는 유저 정보 %*% 유사한 유저 -> 유사한 노래에 대하여 높은 값 나옴
         cand_song_idx = cand_song.reshape(-1).argsort()[-300:][::-1] # 값이 높은 상위 150개 노래 추출
         cand_song_idx = cand_song_idx[np.isin(cand_song_idx, songs_already) == False][:100]  # 중복되는 노래 있는지 확인하고 100개 추출
 
-        cand_tag = train_user_tags_A_T.dot(val) # 똑같은 작업 실시
+        cand_tag = train_user_tags_A.T.tocsr().dot(val) # 똑같은 작업 실시
         cand_tag_idx = cand_tag.reshape(-1).argsort()[-30:][::-1]
         cand_tag_idx = cand_tag_idx[np.isin(cand_tag_idx, tags_already) == False][:10]
         rec_tag_idx = [tag_tid_id[i] for i in cand_tag_idx]
@@ -69,7 +69,6 @@ def run(test,n_songs,n_tags,spr_list,tag_tid_id):
                     })
 
         if i % 1000 == 0:
-            print(i)
-            print("time :", time.time() - start)
+            print("{} time :".format(i), time.time() - start)
 
-    write_json(res, "pre_tag.json")
+    write_json(res, "./dataset/pre_tag.json")
