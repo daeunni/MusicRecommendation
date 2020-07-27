@@ -67,8 +67,8 @@ def run(test,n_songs,n_tags,spr_list,tag_tid_id):
                     "songs": list(cand_song_idx),
                     "tags": rec_tag_idx
                     })
-
         if i % 1000 == 0:
             print("{} time :".format(i), time.time() - start)
 
-    write_json(res, "./dataset/pre_tag.json")
+
+    write_json(res, "pre_tag.json")

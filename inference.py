@@ -1,3 +1,10 @@
+from datetime import timedelta, datetime
+import glob
+import json
+import os
+import re
+import pickle
+
 import os,time
 import pandas as pd
 import numpy as np
@@ -16,7 +23,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 from tqdm import tqdm_notebook
 from sklearn.neighbors import NearestNeighbors
 
+from Dataset import Dataset
+import pre_tag,word2vec_for_tag
+
 def song_inference():
+    sp_total_model_path = "sp_total"
     train = pd.read_json('./dataset/train.json', typ = 'frame',encoding='utf-8')
     song = pd.read_json('./dataset/song_meta.json', typ = 'frame',encoding='utf-8')
     plylst_tag = train['tags']
@@ -340,6 +351,13 @@ def song_inference():
     GEN_val = sparse.csr_matrix(GEN_val)
     GEN_test = sparse.csr_matrix(GEN_test)
 
+    content = data_all['plylst_title']
+    if "{}.model".format(sp_total_model_path) not in os.listdir():
+        makeSentencepieceModel(data_all,sp_total_model_path)
+    sp = SentencePieceProcessor()
+    sp.Load("{}.model".format(sp_total_model_path))
+
+    cv = CountVectorizer(max_features=3000, tokenizer=sp.encode_as_pieces)
     content = data_all['plylst_title']
     tdm = cv.fit_transform(content)
 
@@ -924,6 +942,22 @@ def song_inference():
     sub[6361]['songs'] = list_song
 
     pd.DataFrame(sub)['songs'].apply(len).sort_values()
+    write_json(sub,'final_songs.json')
+    return sub
 
 if __name__ == '__main__':
-    song_inference()
+
+    _data = Dataset()
+
+    #pre_tag.run(_data.test,_data.n_songs,_data.n_tags,_data.spr_list,_data.tag_tid_id)
+    final_tags = word2vec_for_tag.run(_data.total,_data.test)
+
+    final_songs = song_inference()
+    result = []
+    for f_songs, f_tags in zip(final_songs,final_tags):
+        result.append({
+            'id':f_songs['id'],
+            'songs':f_songs['songs'],
+            'tags':f_tags['tags']
+        })
+    write_json(result, 'results.json')

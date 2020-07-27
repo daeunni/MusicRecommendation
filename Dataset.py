@@ -83,13 +83,13 @@ class Dataset:
         #######################################################################
         print("start applying sentencepiece to plylst_title....")
 
-        train_title_tdm = self.make_title_tdm(train,sp_train_model_path)
-        total_title_tdm = self.make_title_tdm(total,sp_total_model_path)
+        cv, title_tdm = make_title_tdm(train,sp_train_model_path)
+        #total_title_tdm = make_title_tdm(total,sp_total_model_path)
 
         print("done. \n")
         #######################################################################
-        train_user_songs_A = self.make_sparse(train,train['songs'],n_songs)
-        train_user_tags_A = self.make_sparse(train,train['tags_id'],n_tags)
+        train_user_songs_A = make_sparse(train,train['songs'],n_songs)
+        train_user_tags_A = make_sparse(train,train['tags_id'],n_tags)
 
         #######################################################################
         song_cate = []
@@ -131,40 +131,23 @@ class Dataset:
                 test_title,title_sp,gnr_sp,test_gnr_sp,\
                 title_gnr,test_title_gnr]
 
-    def make_title_tdm(self,df,path):
-        if "{}.model".format(path) not in os.listdir():
-            makeSentencepieceModel(df,path)
-        sp = SentencePieceProcessor()
-        sp.Load("{}.model".format(path))
+def make_title_tdm(df,path):
+    if "{}.model".format(path) not in os.listdir():
+        makeSentencepieceModel(df,path)
+    sp = SentencePieceProcessor()
+    sp.Load("{}.model".format(path))
 
-        cv = CountVectorizer(max_features=3000, tokenizer=sp.encode_as_pieces)
-        content = df['plylst_title']
-        tdm = cv.fit_transform(content)
+    cv = CountVectorizer(max_features=3000, tokenizer=sp.encode_as_pieces)
+    content = df['plylst_title']
+    tdm = cv.fit_transform(content)
 
-        title_tdm = tdm.toarray()
-        return title_tdm
+    title_tdm = tdm.toarray()
+    return cv,title_tdm
 
-    def make_sparse(self,df,df_item,n_item):
-        n_df = len(df)
-        row = np.repeat(range(n_df), df_item.apply(len)) # User Index 별 노래 개수만큼 만듦
-        col = [item for items in df_item for item in items] # Song dic number 추출
-        dat = np.repeat(1, df_item.apply(len).sum()) # User별 Song이 있는 부분에 1을 넣기위해 1과 전체 노래 개수만큼 만듦
-        spr_matrix = spr.csr_matrix((dat, (row, col)), shape=(n_df, n_item)) # csr_matrix 제작
-        return spr_matrix
-
-    def preprocess(self,df,song):
-        song_cate = []
-        for i in range(len(df)):
-            gnr = []
-            songs = df.iloc[i,3]
-
-            for j in songs:
-                for k in song.loc[j,'song_gn_dtl_gnr_basket']:
-                    gnr.append(k)
-            song_cate.append(gnr)
-        df['plylst_genre'] = song_cate
-        df['tags_id'] = df['tags'].map(lambda x: [tag_id_tid.get(t) for t in x if tag_id_tid.get(t) != None])
-        df['plylst_genre_id'] = df['plylst_genre'].map(lambda x: [genre_id_tid.get(s) for s in x if genre_id_tid.get(s) != None])
-        df.loc[:,'num_songs'] = df['songs'].map(len)
-        df.loc[:,'num_tags'] = df['tags_id'].map(len)
-        # val_title = cv.transform(val['plylst_title']).toarray()
+def make_sparse(df,df_item,n_item):
+    n_df = len(df)
+    row = np.repeat(range(n_df), df_item.apply(len)) # User Index 별 노래 개수만큼 만듦
+    col = [item for items in df_item for item in items] # Song dic number 추출
+    dat = np.repeat(1, df_item.apply(len).sum()) # User별 Song이 있는 부분에 1을 넣기위해 1과 전체 노래 개수만큼 만듦
+    spr_matrix = spr.csr_matrix((dat, (row, col)), shape=(n_df, n_item)) # csr_matrix 제작
+    return spr_matrix

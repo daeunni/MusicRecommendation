@@ -7,7 +7,7 @@ import util
 from collections import Counter
 from gensim.models import Word2Vec
 from gensim.models.keyedvectors import WordEmbeddingsKeyedVectors
-
+from util import write_json
 import train
 
 #total_concat : pd.DataFrame
@@ -43,7 +43,7 @@ def run(total_concat, apply_data):
     if 'item2vec.model' in os.listdir():
         w2v_model = Word2Vec.load('item2vec.model')
     else:
-        train.item2vec(total,size=10)
+        w2v_model = train.item2vec(total,size=10)
     print("done. \n")
     ID = []
     vec = []
@@ -60,7 +60,7 @@ def run(total_concat, apply_data):
     p2v_model.add(ID, vec)
 
 
-    with open("./dataset/pre_tag.json", encoding="utf-8") as f:
+    with open("./arena_data/pre_tag.json", encoding="utf-8") as f:
         our_best = json.load(f)
 
     not_in = 0
@@ -98,3 +98,5 @@ def run(total_concat, apply_data):
             answers[n]['songs'] += remove_seen(q['songs'], our_best[n]['songs'])[:100-len(q['songs'])]
         if len(q['tags'])!=10:
             answers[n]['tags'] += remove_seen(q['tags'], our_best[n]['tags'])[:10-len(q['tags'])]
+    write_json(answers,'final_tags.json')
+    return answers
