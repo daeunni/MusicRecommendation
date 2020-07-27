@@ -24,7 +24,7 @@ def run(total_concat, apply_data):
 
     data = []
     for i in total_concat.index:
-        temp = total_concat.iloc[i]
+        temp = total_concat.loc[i]
         data.append({
             'id':temp['id'],
             'songs':temp['songs'],
