@@ -949,7 +949,7 @@ if __name__ == '__main__':
 
     _data = Dataset()
 
-    #pre_tag.run(_data.test,_data.n_songs,_data.n_tags,_data.spr_list,_data.tag_tid_id)
+    pre_tag.run(_data.test,_data.n_songs,_data.n_tags,_data.spr_list,_data.tag_tid_id)
     final_tags = word2vec_for_tag.run(_data.total,_data.test)
 
     final_songs = song_inference()
