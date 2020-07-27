@@ -12,13 +12,13 @@
 
 ## Usage
 
+```python
+# test 파일 재현
+# song / tag 각각 더 좋은 성능을 낸 모델을 사용
+# song : inference.song_inference()
+# tag : pre_tag -> word2vec_for_tag
+$python3 -m inference
 ```
-
-```
-
-
-
-
 
 ## Song 추천
 
@@ -30,6 +30,6 @@
 
 1. Test 데이터에 song 정보와 tag 정보가 모두 있을 경우 이 두개의 정보와 플레이리스트 이름, 노래 장르정보를 활용하여 CF를 진행. 
 2. Song이 없는 경우 tags 정보와 title 정보를 활용해서 CF를 진행하였고 tag정보가 없는 경우는 song과 장르, title 정보를 활용하여 song과 tag를 추천하는 모델을 작성하였다. 둘다 없는 경우는 Title 정보를 활용
-3. 제목 정보에서 3번 이상한 태그 정보를 추출해 태그에 추가
+3. 제목 정보에서 3번 이상 등장한 태그 정보를 추출해 태그에 추가
 4. 한 플레이리스트에 노래 + 태그를 넣어 Item2Vec 진행
 5. Song / Tag 정보가 없거나 부족한 경우 2번에서 구한 Tag값을 가져옴
