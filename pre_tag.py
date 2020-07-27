@@ -1,5 +1,7 @@
+import pandas as pd
 import numpy as np
 import time
+import scipy.sparse as spr
 from util import write_json
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -10,7 +12,7 @@ def run(test,n_songs,n_tags,spr_list,tag_tid_id):
         title_gnr,test_title_gnr = spr_list
 
     res = []
-    for i in tqdm_notebook(range(len(test))):
+    for i in range(len(test)):
         dat = test.iloc[i]
         pid = i
         songs_already = dat["songs"]
